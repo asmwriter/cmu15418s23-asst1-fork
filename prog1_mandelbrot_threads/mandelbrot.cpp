@@ -123,6 +123,12 @@ void* workerThreadStart(void* threadArgs) {
     // TODO: Implement worker thread here.
 
     printf("Hello world from thread %d\n", args->threadId);
+    unsigned int threadStartRow = args->threadId * (args->height/args->numThreads); 
+    unsigned int threadEndRow = ( args->threadId + 1) * (args->height/args->numThreads) - 1u;
+    printf("startrow = %u, endrow = %u", threadStartRow, threadEndRow);
+    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, 
+                    args->width, args->height, threadStartRow, threadEndRow, 
+                    args->maxIterations, args->output); 
 
     return NULL;
 }
