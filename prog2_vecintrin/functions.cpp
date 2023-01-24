@@ -149,10 +149,10 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 			
 			//Generate mask for if(y & 0x1)
 			__cmu418_mask ylsbmask;
-			_cmu418_veq_int(ylsbmask, ylsb, vectOnes, ydonemask);
+			_cmu418_veq_int(ylsbmask, ylsb, vectZeroes, ydonemask);
 			
 			//Compute result *= xpower with y&0x1 mask
-			_cmu418_vmult_float(result, xpower, xpower, ylsbmask);
+			_cmu418_vmult_float(result, result, xpower, ylsbmask);
 		
 			//Compute xpower = xpower * xpower with ydonemask
 			_cmu418_vmult_float(xpower, xpower, xpower, ydonemask);
