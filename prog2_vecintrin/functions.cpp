@@ -163,7 +163,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 			_cmu418_vshiftright_int(y, y, vectOnes, ydonemask);
 			
 			//Compute y>0
-			_cmu418_vgt_int(ydonemask, y, vectZeroes, maskAll);
+			_cmu418_vgt_int(ydonemask, y, vectZeroes, ydonemask);
 
 			done = _cmu418_cntbits(ydonemask);
 		}
