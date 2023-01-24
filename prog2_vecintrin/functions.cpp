@@ -84,8 +84,8 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
     // Implement your vectorized version of clampedExpSerial here
     //  ...
 	__cmu418_vec_float x, result, const1, xpower;
-	_cmu418_vec_int vectOnes, vectZeroes, y;	
-	_cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
+	__cmu418_vec_int vectOnes, vectZeroes, y;	
+	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
 
 	for (int i=0; i<N; i+=VECTOR_WIDTH) {
 		
@@ -100,7 +100,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		//result = 1.f
 		_cmu418_vset_float(result, 1.f, maskAll);
 		//constant = 4.18f
-		_cmu418_vset_float(const1, 1.f, maskAll);
+		_cmu418_vset_float(const1, 4.18f, maskAll);
 		
 		//All ones and zero integers
 		_cmu418_vset_int(vectOnes, 1, maskAll);
@@ -115,12 +115,12 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		_cmu418_vmove_float(xpower, x, maskAll);
 		
 		int done = 0;
-		_cmu418_mask ydonemask = _cmu418_init_ones();
+		__cmu418_mask ydonemask = _cmu418_init_ones();
 		done = _cmu418_cntbits(ydonemask);
 		// y > 0
 		while(done){
 			// Compute y & 0x1
-			_cmu418_vec_int ylsb;
+			__cmu418_vec_int ylsb;
 			_cmu418_vbitand_int(ylsb, y, vectOnes, mask);
 			
 			//Generate mask for if(y & 0x1)
@@ -143,10 +143,10 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		}
 		
 		//Compute result > 4.18f for all lanes
-		_cmu418_vgt_float(resultgt, result, const, maskAll);
+		_cmu418_vgt_float(resultgt, result, const1, maskAll);
 
 		//Set result = 4.18f for lanes 
-		_cmu418_vset_float(const1, 4.18f, resultgt);
+		_cmu418_vset_float(result, 4.18f, resultgt);
 		
 		//output[i] = result
 		_cmu418_vstore_float(output+i, result, maskAll);
@@ -172,7 +172,7 @@ float arraySumVector(float* values, int N) {
 	int level = 0;
 	float sum = 0.0f;
 	int stride = VECTOR_WIDTH;
-	_cmu418_mask maskAll = _cmu418_init_ones();
+	__cmu418_mask maskAll = _cmu418_init_ones();
 	for(int stride = VECTOR_WIDTH; stride<N; stride = stride<<1){
 		for (int i=0; i<N; i+=stride*2) {
 			_cmu418_vadd_float(values+i, values+i, values+i+stride, maskAll);
