@@ -101,11 +101,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 	__cmu418_vec_float x, result, const1, xpower;
 	__cmu418_vec_int vectOnes, vectZeroes, y;	
 	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
-	_cmu418_vset_int(vectOnes, 1, maskAll);
-	_cmu418_vset_int(vectZeroes, 0, maskAll);
-	printVec_Int(vectOnes);
-	printVec_Int(vectZeroes);
-
+	
 
 	for (int i=0; i<N; i+=VECTOR_WIDTH) {
 		
@@ -122,6 +118,12 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		//constant = 4.18f
 		_cmu418_vset_float(const1, 4.18f, maskAll);
 
+		_cmu418_vset_int(vectOnes, 1, maskAll);
+		_cmu418_vset_int(vectZeroes, 0, maskAll);
+		std::cout<<"printing vectOnes"<<std::endl;
+		printVec_Int(vectOnes);
+		std::cout<<"printing vectZeroes"<<std::endl;
+		printVec_Int(vectZeroes);
 		
 		//All ones and zero integers
 		
