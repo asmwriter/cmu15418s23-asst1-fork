@@ -83,6 +83,75 @@ void clampedExpSerial(float* values, int* exponents, float* output, int N) {
 void clampedExpVector(float* values, int* exponents, float* output, int N) {
     // Implement your vectorized version of clampedExpSerial here
     //  ...
+	__cmu418_vec_float x, result, const1, xpower;
+	_cmu418_vec_int vectOnes, vectZeroes, y;	
+	_cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
+
+	for (int i=0; i<N; i+=VECTOR_WIDTH) {
+		
+		// All ones
+		maskAll = _cmu418_init_ones();
+		
+		// Load vector of values from contiguous memory addresses
+		//x = values[i]
+		_cmu418_vload_float(x, values+i, maskAll);               
+
+		//Set vector result to 1.0f
+		//result = 1.f
+		_cmu418_vset_float(result, 1.f, maskAll);
+		//constant = 4.18f
+		_cmu418_vset_float(const1, 1.f, maskAll);
+		
+		//All ones and zero integers
+		_cmu418_vset_int(vectOnes, 1, maskAll);
+		_cmu418_vset_int(vectorZeroes, 0, maskAll);
+
+		//Load vector of values from exponents array
+		//y = exponents[i]
+		_cmu418_vload_int(y, exponents+i, maskAll);
+		
+		//move vector x to xpower
+		//float xpower = x
+		_cmu418_vmove_float(xpower, x, maskAll);
+		
+		int done = 0;
+		_cmu418_mask ydonemask = _cmu418_init_ones();
+		done = _cmu418_cntbits(ydonemask);
+		// y > 0
+		while(done){
+			// Compute y & 0x1
+			_cmu418_vec_int ylsb;
+			_cmu418_vbitand_int(ylsb, y, vectOnes, mask);
+			
+			//Generate mask for if(y & 0x1)
+			__cmu418_mask ylsbmask;
+			_cmu418_veq_int(ylsbmask, ylsb, vectOnes, ydonemask);
+			
+			//Compute result *= xpower with y&0x1 mask
+			_cmu418_vmult_float(result, xpower, xpower, ylsbmask);
+		
+			//Compute xpower = xpower * xpower with ydonemask
+			_cmu418_vmult_float(xpower, xpower, xpower, ydonemask);
+			
+			// Compute y>> = 1 with ydonemask
+			_cmu418_vshiftright_int(y, y, vectOnes, ydonemask);
+			
+			//Compute y>0
+			_cmu418_vgt_int(ydonemask, y, vectorZeroes, maskAll);
+
+			done = _cmu418_cntbits(ydonemask);
+		}
+		
+		//Compute result > 4.18f for all lanes
+		_cmu418_vgt_float(resultgt, result, const, maskAll);
+
+		//Set result = 4.18f for lanes 
+		_cmu418_vset_float(const1, 4.18f, resultgt);
+		
+		//output[i] = result
+		_cmu418_vstore_float(output+i, result, maskAll);
+
+	}
 }
 
 
@@ -100,5 +169,16 @@ float arraySumSerial(float* values, int N) {
 float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
-	return 0.f;
+	int level = 0;
+	float sum = 0;
+	int stride = VECTOR_WIDTH;
+	for(int stride = VECTOR_WIDTH; stride<N; stride = stride<<1){
+		for (int i=0; i<N; i+=stride*2) {
+			_cmu418_vadd_int(values+i, values+i, values+i+stride, __cmu418_mask &mask);
+		}
+	}
+	for(int i = 0; i<VECTOR_WIDTH; i++){
+		sum += values[i];
+	}
+	return sum;
 }
