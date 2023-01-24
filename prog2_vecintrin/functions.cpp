@@ -170,11 +170,12 @@ float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
 	int level = 0;
-	float sum = 0;
+	float sum = 0.0f;
 	int stride = VECTOR_WIDTH;
+	_cmu418_mask maskAll = _cmu418_init_ones();
 	for(int stride = VECTOR_WIDTH; stride<N; stride = stride<<1){
 		for (int i=0; i<N; i+=stride*2) {
-			_cmu418_vadd_int(values+i, values+i, values+i+stride, __cmu418_mask &mask);
+			_cmu418_vadd_float(values+i, values+i, values+i+stride, maskAll);
 		}
 	}
 	for(int i = 0; i<VECTOR_WIDTH; i++){
