@@ -104,7 +104,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		
 		//All ones and zero integers
 		_cmu418_vset_int(vectOnes, 1, maskAll);
-		_cmu418_vset_int(vectorZeroes, 0, maskAll);
+		_cmu418_vset_int(vectZeroes, 0, maskAll);
 
 		//Load vector of values from exponents array
 		//y = exponents[i]
@@ -121,7 +121,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		while(done){
 			// Compute y & 0x1
 			__cmu418_vec_int ylsb;
-			_cmu418_vbitand_int(ylsb, y, vectOnes, mask);
+			_cmu418_vbitand_int(ylsb, y, vectOnes, ydonemask);
 			
 			//Generate mask for if(y & 0x1)
 			__cmu418_mask ylsbmask;
@@ -137,7 +137,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 			_cmu418_vshiftright_int(y, y, vectOnes, ydonemask);
 			
 			//Compute y>0
-			_cmu418_vgt_int(ydonemask, y, vectorZeroes, maskAll);
+			_cmu418_vgt_int(ydonemask, y, vectZeroes, maskAll);
 
 			done = _cmu418_cntbits(ydonemask);
 		}
@@ -173,9 +173,14 @@ float arraySumVector(float* values, int N) {
 	float sum = 0.0f;
 	int stride = VECTOR_WIDTH;
 	__cmu418_mask maskAll = _cmu418_init_ones();
+	__cmu418_vec_float op_add1, op_add2;
+	
 	for(int stride = VECTOR_WIDTH; stride<N; stride = stride<<1){
 		for (int i=0; i<N; i+=stride*2) {
-			_cmu418_vadd_float(values+i, values+i, values+i+stride, maskAll);
+			_cmu418_vload_float(op_add1, values+i, maskAll); 
+			_cmu418_vload_float(op_add2, values+i+stride, maskAll); 
+			_cmu418_vadd_float(op_add1, op_add1, op_add2, maskAll);
+			_cmu418_vstore_float(values+i, op_add1, maskAll);
 		}
 	}
 	for(int i = 0; i<VECTOR_WIDTH; i++){
