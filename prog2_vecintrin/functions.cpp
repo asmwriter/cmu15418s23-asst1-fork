@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <algorithm>
 #include <math.h>
 #include "CMU418intrin.h"
@@ -80,12 +81,31 @@ void clampedExpSerial(float* values, int* exponents, float* output, int N) {
     }
 }
 
+void printVec(const __cmu418_vec_float &x) {
+	for (int i = 0; i < VECTOR_WIDTH; i++) {
+		std::cout << x.value[i] << ", ";
+	}
+	std::cout << '\n';
+}
+
+void printVec_Int(const __cmu418_vec_int &x) {
+	for (int i = 0; i < VECTOR_WIDTH; i++) {
+		std::cout << x.value[i] << ", ";
+	}
+	std::cout << '\n';
+}
+
 void clampedExpVector(float* values, int* exponents, float* output, int N) {
     // Implement your vectorized version of clampedExpSerial here
     //  ...
 	__cmu418_vec_float x, result, const1, xpower;
 	__cmu418_vec_int vectOnes, vectZeroes, y;	
 	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
+	_cmu418_vset_int(vectOnes, 1, maskAll);
+	_cmu418_vset_int(vectZeroes, 0, maskAll);
+	printVec_Int(vectOnes);
+	printVec_Int(vectZeroes);
+
 
 	for (int i=0; i<N; i+=VECTOR_WIDTH) {
 		
@@ -101,10 +121,10 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		_cmu418_vset_float(result, 1.f, maskAll);
 		//constant = 4.18f
 		_cmu418_vset_float(const1, 4.18f, maskAll);
+
 		
 		//All ones and zero integers
-		_cmu418_vset_int(vectOnes, 1, maskAll);
-		_cmu418_vset_int(vectZeroes, 0, maskAll);
+		
 
 		//Load vector of values from exponents array
 		//y = exponents[i]
@@ -116,6 +136,8 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		
 		int done = 0;
 		__cmu418_mask ydonemask = _cmu418_init_ones();
+		//Compute y>0
+		_cmu418_vgt_int(ydonemask, y, vectZeroes, maskAll);
 		done = _cmu418_cntbits(ydonemask);
 		// y > 0
 		while(done){
