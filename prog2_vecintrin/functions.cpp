@@ -64,36 +64,21 @@ void absVector(float* values, float* output, int N) {
 void clampedExpSerial(float* values, int* exponents, float* output, int N) {
     for (int i=0; i<VECTOR_WIDTH; i++) {
 	float x = values[i];
-	std::cout<<"Init floats: "<<x<<std::endl;           
 	float result = 1.f;
-	std::cout<<"Init result: "<<result<<std::endl;           
 	int y = exponents[i];
-	std::cout<<"Init y: "<<y<<std::endl;           
 	float xpower = x;
-	std::cout<<"Init xpower: "<<xpower<<std::endl;           
 	while (y > 0) {
-		std::cout<<"*****"<<std::endl;
-		std::cout<<"DEBUG: y:"<<(y)<<std::endl;
-		std::cout<<"DEBUG: y&0x1:"<<(y&0x1)<<std::endl;
 	    if (y & 0x1) {
 			result *= xpower;
 		}
-		std::cout<<"DEBUG: result:"<<result<<std::endl;
 	    xpower = xpower * xpower;
-		std::cout<<"DEBUG: xpower:"<<xpower<<std::endl;
 	    y >>= 1;
-		std::cout<<"DEBUG: y:"<<y<<std::endl;
-		std::cout<<"*****"<<std::endl;
+
 	}
-	std::cout<<"DEBUG: result:"<<result<<std::endl;
 	if (result > 4.18f) {
 	    result = 4.18f;
 	}
-	std::cout<<"DEBUG: result:"<<result<<std::endl;
 	output[i] = result;
-	//DEBUG
-	std::cout<<"DEBUG: y"<<y<<std::endl;
-	std::cout<<"DEBUG: result"<<result<<std::endl;
     }
 }
 
@@ -127,60 +112,37 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 		// Load vector of values from contiguous memory addresses
 		//x = values[i]
 		_cmu418_vload_float(x, values+i, maskAll);    
-		std::cout<<"Init floats: "<<std::endl;           
-		printVec(x);
+
 		//Set vector result to 1.0f
 		//result = 1.f
 		_cmu418_vset_float(result, 1.f, maskAll);
-		std::cout<<"Init result: "<<std::endl;
-		printVec(result);
+
 		//constant = 4.18f
 		_cmu418_vset_float(const1, 4.18f, maskAll);
 
 		_cmu418_vset_int(vectOnes, 1, maskAll);
 		_cmu418_vset_int(vectZeroes, 0, maskAll);
-		std::cout<<"Init vectOnes"<<std::endl;
-		printVec_Int(vectOnes);
-		std::cout<<"Init vectZeroes"<<std::endl;
-		printVec_Int(vectZeroes);
-		
+				
 		//All ones and zero integers
 		
 		//Load vector of values from exponents array
 		//y = exponents[i]
 		_cmu418_vload_int(y, exponents+i, maskAll);
 
-		//DEBUG
-		std::cout<<"Init: y"<<std::endl;
-		printVec_Int(y);
 		//move vector x to xpower
 		//float xpower = x
 		_cmu418_vmove_float(xpower, x, maskAll);
-		
-		//DEBUG
-		std::cout<<"Init: xpower"<<std::endl;
-		printVec(xpower);
-		
+				
 		int done = 0;
 		__cmu418_mask ydonemask = _cmu418_init_ones();
 		//Compute y>0
 		_cmu418_vgt_int(ydonemask, y, vectZeroes, maskAll);
 		done = _cmu418_cntbits(ydonemask);
-		std::cout<<"Init: done"<<done<<std::endl;
 		// y > 0
 		while(done){
-			std::cout<<"*****"<<std::endl;
 			// Compute y & 0x1
 			__cmu418_vec_int ylsb;
 			_cmu418_vbitand_int(ylsb, y, vectOnes, ydonemask);
-
-			//DEBUG
-			std::cout<<"DEBUG: y"<<std::endl;
-			printVec_Int(y);
-	
-			//DEBUG
-			std::cout<<"DEBUG: y&0x1"<<std::endl;
-			printVec_Int(ylsb);
 
 			//Generate mask for if(y & 0x1)
 			__cmu418_mask ylsbmask_not, ylsbmask;
@@ -191,37 +153,20 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 			
 			//Compute result *= xpower with y&0x1 mask
 			_cmu418_vmult_float(result, result, xpower, ylsbmask);
-
-			//DEBUG
-			std::cout<<"DEBUG: result:"<<std::endl;
-			printVec(result);
 		
 			//Compute xpower = xpower * xpower with ydonemask
 			_cmu418_vmult_float(xpower, xpower, xpower, ydonemask);
 
-			//DEBUG
-			std::cout<<"DEBUG: xpower"<<std::endl;
-			printVec(xpower);
-			
 			// Compute y>> = 1 with ydonemask
 			_cmu418_vshiftright_int(y, y, vectOnes, ydonemask);
-
-			//DEBUG
-			std::cout<<"DEBUG: y:"<<std::endl;
-			printVec_Int(y);
 					
 			//Compute y>0
 			_cmu418_vgt_int(ydonemask, y, vectZeroes, ydonemask);
 
 			done = _cmu418_cntbits(ydonemask);
 
-			std::cout<<"DEBUG: done"<<std::endl;
-			printf("done:%u\n", done);
-			std::cout<<"*****"<<std::endl;
 		}
 		
-		std::cout<<"DEBUG y>0 done"<<std::endl;
-		printf("done:%u\n", done);
 		//Compute result > 4.18f for all lanes
 		_cmu418_vgt_float(resultgt, result, const1, maskAll);
 
