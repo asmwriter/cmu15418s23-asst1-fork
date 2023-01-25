@@ -81,12 +81,13 @@ void mandelbrotSerial(
     int width, int height,
     int startRow, int endRow,
     int maxIterations,
+    int skipRows, 
     int output[])
 {
     float dx = (x1 - x0) / width;
     float dy = (y1 - y0) / height;
 
-    for (int j = startRow; j < endRow; j++) {
+    for (int j = startRow; j < endRow; j=j+skipRows) {
         for (int i = 0; i < width; ++i) {
             float x = x0 + i * dx;
             float y = y0 + j * dy;
@@ -124,16 +125,20 @@ void* workerThreadStart(void* threadArgs) {
 
     //printf("Hello world from thread %d\n", args->threadId);
     //printf("args->numthreads = %u\n", args->numThreads);
+    /*
     unsigned int threadRows = args->height/args->numThreads;
     unsigned int remRows = args->height - args->numThreads*(args->height/args->numThreads);
     unsigned int threadStartRow = ( args->threadId * (args->height/args->numThreads) ) 
                                         + ((args->threadId < remRows) ? args->threadId:(args->threadId!=0? remRows:0));
     unsigned int threadEndRow = threadStartRow + threadRows + ((args->threadId<remRows)?1:0);
+    */
     //printf("startrow = %u, endrow = %u\n", threadStartRow, threadEndRow);
+    int skipRows = args->numThreads;
+    
     mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, 
                     args->width, (args->height), 
-                    threadStartRow, threadEndRow, 
-                    args->maxIterations, args->output); 
+                    args->threadId, args->height, 
+                    args->maxIterations, skipRows, args->output); 
 
     return NULL;
 }
