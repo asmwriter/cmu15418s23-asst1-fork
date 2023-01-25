@@ -121,8 +121,11 @@ void* workerThreadStart(void* threadArgs) {
 
     WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
 
-    // TODO: Implement worker thread here.
-
+    /*
+        Work Decomposition policy 1: Blocked image computation
+        1. Each thread computes an (almost) equal portion of mandelbrot image. 
+        2. Each thread is assigned a block of Consecutive rows in the image. 
+    */
     //printf("Hello world from thread %d\n", args->threadId);
     //printf("args->numthreads = %u\n", args->numThreads);
     /*
@@ -133,6 +136,13 @@ void* workerThreadStart(void* threadArgs) {
     unsigned int threadEndRow = threadStartRow + threadRows + ((args->threadId<remRows)?1:0);
     */
     //printf("startrow = %u, endrow = %u\n", threadStartRow, threadEndRow);
+
+    /* 
+    Work Decomposition policy 2: Interleaving row computation of threads. 
+        1. Each threads computes the mandelbrot image in an interleaved fashion.
+        2. Each thread i computes the image at rows: i, i+numThreads, i+2*numThreads and so on until the image is done.
+        
+    */
     int skipRows = args->numThreads;
     
     mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, 

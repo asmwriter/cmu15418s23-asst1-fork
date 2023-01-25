@@ -62,7 +62,7 @@ void absVector(float* values, float* output, int N) {
 // Uses iterative squaring, so that total iterations is proportional
 // to the log_2 of the exponent
 void clampedExpSerial(float* values, int* exponents, float* output, int N) {
-    for (int i=0; i<VECTOR_WIDTH; i++) {
+    for (int i=0; i<N; i++) {
 	float x = values[i];
 	float result = 1.f;
 	int y = exponents[i];
@@ -104,7 +104,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
 	
 
-	for (int i=0; i<VECTOR_WIDTH; i+=VECTOR_WIDTH) {
+	for (int i=0; i<N; i+=VECTOR_WIDTH) {
 		
 		// All ones
 		maskAll = _cmu418_init_ones();
@@ -190,6 +190,7 @@ float arraySumSerial(float* values, int N) {
 
 // Assume N % VECTOR_WIDTH == 0
 // Assume VECTOR_WIDTH is a power of 2
+/*
 float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
@@ -208,6 +209,31 @@ float arraySumVector(float* values, int N) {
 		}
 	}
 	for(int i = 0; i<VECTOR_WIDTH; i++){
+		sum += values[i];
+	}
+	return sum;
+}
+*/
+
+float arraySumVector(float* values, int N) {
+    // Implement your vectorized version here
+    //  ...
+	int level = 0;
+	float sum = 0.0f;
+	__cmu418_mask maskAll = _cmu418_init_ones();
+	__cmu418_vec_float op_add1;
+	for (int i=0; i<N; i+=VECTOR_WIDTH) {
+		int num = VECTOR_WIDTH;
+		_cmu418_vload_float(op_add1, values+i, maskAll); 
+		while(num!=1){
+			_cmu418_hadd_float(op_add1, op_add1);
+			_cmu418_interleave_float(op_add1, op_add1);
+			num = num/2;
+		}
+		_cmu418_vstore_float(values+i, op_add1, maskAll);
+	}
+
+	for(int i = 0; i<N; i+=VECTOR_WIDTH){
 		sum += values[i];
 	}
 	return sum;
