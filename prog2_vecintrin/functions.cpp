@@ -230,11 +230,9 @@ float arraySumVector(float* values, int N) {
 			_cmu418_interleave_float(op_add1, op_add1);
 			num = num/2;
 		}
-		_cmu418_vstore_float(values+i, op_add1, maskAll);
-	}
-
-	for(int i = 0; i<N; i+=VECTOR_WIDTH){
-		sum += values[i];
+		sum += op_add1[0];
 	}
 	return sum;
 }
+
+
