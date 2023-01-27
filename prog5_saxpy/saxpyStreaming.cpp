@@ -22,13 +22,17 @@ void saxpyStreaming(int N,
     long unsigned int vec_alignment  = 128;
     long unsigned int vec_width = vec_alignment/sizeof(float);
 	long unsigned int nbVec = (N/vec_width);
+    std::cout<<"vec_alignment:"<<vec_alignment<<std::endl;
+    std::cout<<"vec_width:"<<vec_width<<std::endl;
+    std::cout<<"nbVec:"<<nbVec<<std::endl;
+    __m128 vec_X, vec_aX, vec_Y, vec_result;
     //saxpySerial(N, scale, X, Y, result);
     for (long unsigned int i=0; i<nbVec; i++) {
         //result[i] = scale * X[i] + Y[i];        
-        __m128 vec_X = _mm_loadu_ps((X + i*vec_width));
-		__m128 vec_aX = _mm_mul_ps (vec_X, vec_scale);
-		__m128 vec_Y = _mm_loadu_ps((Y + i*vec_width));
-		__m128 vec_result = _mm_add_ps(vec_aX, vec_Y);
+        vec_X = _mm_stream_load_si128((__m128i*)(X + i*vec_width));
+		vec_aX = _mm_mul_ps (vec_X, vec_scale);
+		vec_Y = _mm_stream_load_si128((__m128i*)(Y + i*vec_width));
+		vec_result = _mm_add_ps(vec_aX, vec_Y);
 		_mm_stream_ps (result + i*vec_width, vec_result);
     }
 }
