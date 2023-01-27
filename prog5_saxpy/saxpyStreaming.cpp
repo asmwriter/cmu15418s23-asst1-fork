@@ -1,6 +1,7 @@
 #include <smmintrin.h> // For _mm_stream_load_si128
 #include <emmintrin.h> // For _mm_mul_ps
 #include <immintrin.h>
+#include <iostream>
 #include <assert.h>
 #include <stdint.h>
 
