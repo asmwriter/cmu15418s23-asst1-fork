@@ -29,9 +29,9 @@ void saxpyStreaming(int N,
     //saxpySerial(N, scale, X, Y, result);
     for (long unsigned int i=0; i<nbVec; i++) {
         //result[i] = scale * X[i] + Y[i];        
-        vec_X = _mm_stream_load_si128((__m128i*)(X + i*vec_width));
+        vec_X = (__m128)_mm_stream_load_si128((__m128i*)(X + i*vec_width));
 		vec_aX = _mm_mul_ps (vec_X, vec_scale);
-		vec_Y = _mm_stream_load_si128((__m128i*)(Y + i*vec_width));
+		vec_Y = (__m128)_mm_stream_load_si128((__m128i*)(Y + i*vec_width));
 		vec_result = _mm_add_ps(vec_aX, vec_Y);
 		_mm_stream_ps (result + i*vec_width, vec_result);
     }
