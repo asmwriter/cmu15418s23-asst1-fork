@@ -18,7 +18,7 @@ void saxpyStreaming(int N,
                     float result[])
 {
     // Replace this code with ones that make use of the streaming instructions
-    __m128 vec_scale = _mm_broadcast_ss (&scale);
+    __m128 vec_scale = _mm_set_ps1(scale);
     long unsigned int vec_alignment  = 128;
     long unsigned int vec_width = vec_alignment/sizeof(float);
 	long unsigned int nbVec = (N/vec_width);
