@@ -23,9 +23,9 @@ void saxpyStreaming(int N,
     long unsigned int vec_alignment  = 128;
     long unsigned int vec_width = vec_alignment/sizeof(float);
 	long unsigned int nbVec = (N/vec_width);
-    std::cout<<"vec_alignment:"<<vec_alignment<<std::endl;
-    std::cout<<"vec_width:"<<vec_width<<std::endl;
-    std::cout<<"nbVec:"<<nbVec<<std::endl;
+    // std::cout<<"vec_alignment:"<<vec_alignment<<std::endl;
+    // std::cout<<"vec_width:"<<vec_width<<std::endl;
+    // std::cout<<"nbVec:"<<nbVec<<std::endl;
     __m128 vec_X, vec_aX, vec_Y, vec_result;
     //saxpySerial(N, scale, X, Y, result);
     for (long unsigned int i=0; i<nbVec; i++) {
