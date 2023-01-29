@@ -192,6 +192,31 @@ float arraySumSerial(float* values, int N) {
     return sum;
 }
 
+float arraySumVector(float* values, int N) {
+    // Implement your vectorized version here
+    //  ...
+	int level = 0;
+	float sum = 0.0f;
+	__cmu418_mask maskAll = _cmu418_init_ones();
+	__cmu418_vec_float op_add1;
+	for (int i=0; i<N; i+=VECTOR_WIDTH) {
+		int num = VECTOR_WIDTH;
+		_cmu418_vload_float(op_add1, values+i, maskAll); 
+		while(num!=1){
+			_cmu418_hadd_float(op_add1, op_add1);
+			_cmu418_interleave_float(op_add1, op_add1);
+			num = num/2;
+		}
+		_cmu418_vstore_float(values+i, op_add1, maskAll);
+	}
+
+	for(int i = 0; i<N; i+=VECTOR_WIDTH){
+		sum += values[i];
+	}
+	return sum;
+}
+
+/*
 // Assume N % VECTOR_WIDTH == 0
 // Assume VECTOR_WIDTH is a power of 2
 float arraySumVector(float* values, int N) {
@@ -217,7 +242,7 @@ float arraySumVector(float* values, int N) {
 	return sum;
 }
 
-/*
+
  float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
