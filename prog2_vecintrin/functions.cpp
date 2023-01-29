@@ -32,6 +32,7 @@ void absVector(float* values, float* output, int N) {
 
 	// All ones
 	maskAll = _cmu418_init_ones();
+	
 
 	// All zeros
 	maskIsNegative = _cmu418_init_ones(0);
@@ -101,14 +102,17 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
     //  ...
 	__cmu418_vec_float x, result, const1, xpower;
 	__cmu418_vec_int vectOnes, vectZeroes, y;	
-	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt;
+	__cmu418_mask maskAll, ydonemask, ylsbmask, resultgt, occupiedLanes;
 	
 
 	for (int i=0; i<N; i+=VECTOR_WIDTH) {
 		
 		// All ones
-		maskAll = _cmu418_init_ones();
+		int currentLaneWidth = (i+VECTOR_WIDTH <= N) ? VECTOR_WIDTH : N - i;
+		maskAll = _cmu418_init_ones(currentLaneWidth);
 		
+		//Handle corner case of vector lanes not getting any inputs
+		//maskAll = _cmu418_mask_and(maskAll, ylsbmask);
 		// Load vector of values from contiguous memory addresses
 		//x = values[i]
 		_cmu418_vload_float(x, values+i, maskAll);    
@@ -190,7 +194,6 @@ float arraySumSerial(float* values, int N) {
 
 // Assume N % VECTOR_WIDTH == 0
 // Assume VECTOR_WIDTH is a power of 2
-/*
 float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
@@ -213,9 +216,9 @@ float arraySumVector(float* values, int N) {
 	}
 	return sum;
 }
-*/
 
-float arraySumVector(float* values, int N) {
+/*
+ float arraySumVector(float* values, int N) {
     // Implement your vectorized version here
     //  ...
 	int level = 0;
@@ -235,4 +238,4 @@ float arraySumVector(float* values, int N) {
 	return sum;
 }
 
-
+*/
