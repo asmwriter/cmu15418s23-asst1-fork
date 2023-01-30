@@ -141,7 +141,6 @@ typedef struct {
 //
 // Thread entrypoint.
 void* workerThreadStart(void* threadArgs) {
-    double startTime = CycleTimer::currentSeconds();
     WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
 
     /*
@@ -172,7 +171,6 @@ void* workerThreadStart(void* threadArgs) {
                     args->width, (args->height), 
                     args->threadId, args->height, 
                     args->maxIterations, skipRows, args->output); 
-    double endTime = CycleTimer::currentSeconds();
     return NULL;
 }
 
