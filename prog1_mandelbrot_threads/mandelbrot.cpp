@@ -81,6 +81,29 @@ void mandelbrotSerial(
     int width, int height,
     int startRow, int endRow,
     int maxIterations,
+    int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    for (int j = startRow; j < endRow; j++) {
+        for (int i = 0; i < width; ++i) {
+            float x = x0 + i * dx;
+            float y = y0 + j * dy;
+
+            int index = (j * width + i);
+            output[index] = mandel(x, y, maxIterations);
+        }
+    }
+}
+
+
+
+void mandelbrotSerial_v2(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startRow, int endRow,
+    int maxIterations,
     int skipRows, 
     int output[])
 {
@@ -118,7 +141,7 @@ typedef struct {
 //
 // Thread entrypoint.
 void* workerThreadStart(void* threadArgs) {
-
+    double startTime = CycleTimer::currentSeconds();
     WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
 
     /*
@@ -145,11 +168,12 @@ void* workerThreadStart(void* threadArgs) {
     */
     int skipRows = args->numThreads;
     
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, 
+    mandelbrotSerial_v2(args->x0, args->y0, args->x1, args->y1, 
                     args->width, (args->height), 
                     args->threadId, args->height, 
                     args->maxIterations, skipRows, args->output); 
-
+    double endTime = CycleTimer::currentSeconds();
+    printf("[mandelbrot thread ID: %d ]:\t\t[%.3f] ms\n", args->threadId, (endTime - startTime) * 1000);
     return NULL;
 }
 

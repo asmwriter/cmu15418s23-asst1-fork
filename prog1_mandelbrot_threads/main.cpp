@@ -4,12 +4,19 @@
 
 #include "CycleTimer.h"
 
-extern void mandelbrotSerial(
+extern void mandelbrotSerial_v2(
     float x0, float y0, float x1, float y1,
     int width, int height,
     int startRow, int endRow,
     int maxIterations,
     int skipRows,
+    int output[]);
+
+extern void mandelbrotSerial(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startRow, int endRow,
+    int maxIterations,
     int output[]);
 
 extern void mandelbrotThread(
@@ -138,7 +145,7 @@ int main(int argc, char** argv) {
     double minSerial = 1e30;
     for (int i = 0; i < 3; ++i) {
         double startTime = CycleTimer::currentSeconds();
-        mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, 1, output_serial);
+        mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
         double endTime = CycleTimer::currentSeconds();
         minSerial = std::min(minSerial, endTime - startTime);
     }
