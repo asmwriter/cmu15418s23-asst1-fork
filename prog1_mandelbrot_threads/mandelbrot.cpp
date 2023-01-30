@@ -173,7 +173,6 @@ void* workerThreadStart(void* threadArgs) {
                     args->threadId, args->height, 
                     args->maxIterations, skipRows, args->output); 
     double endTime = CycleTimer::currentSeconds();
-    printf("[mandelbrot thread ID: %d ]:\t\t[%.3f] ms\n", args->threadId, (endTime - startTime) * 1000);
     return NULL;
 }
 
