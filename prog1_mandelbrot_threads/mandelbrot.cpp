@@ -117,7 +117,7 @@ typedef struct {
 //
 // Thread entrypoint.
 void* workerThreadStart(void* threadArgs) {
-
+    double startTime = CycleTimer::currentSeconds();
     WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
 
     // TODO: Implement worker thread here.
@@ -134,7 +134,8 @@ void* workerThreadStart(void* threadArgs) {
                     args->width, (args->height), 
                     threadStartRow, threadEndRow, 
                     args->maxIterations, args->output); 
-
+    double endTime = CycleTimer::currentSeconds();
+    printf("[mandelbrot thread ID: %d ]:\t\t[%.3f] ms\n", args->threadId, (endTime - startTime) * 1000);
     return NULL;
 }
 
